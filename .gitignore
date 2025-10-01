@@ -1,0 +1,79 @@
+# ------------------------
+# Go
+# ------------------------
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.log
+*.prof
+*.tmp
+*.db
+/go.sum
+
+# Go build cache & binaries
+bin/
+dist/
+build/
+*.a
+
+# ------------------------
+# Node / React
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.pnp/
+.pnp.js
+.cache/
+.vite/
+.next/
+out/
+build/
+dist/
+
+# ------------------------
+# Environment / Secrets
+# ------------------------
+.env
+.env.local
+.env.*.local
+*.secret
+*.key
+*.pem
+
+# ------------------------
+# Docker / Volumes
+# ------------------------
+/data/
+docker-data/
+*.pid
+*.sock
+
+# ------------------------
+# Databases / Storage
+# ------------------------
+*.sqlite
+*.db
+*.rdb
+pgdata/
+redis-data/
+minio-data/
+
+# ------------------------
+# System / IDE
+# ------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+*~
