@@ -1,25 +1,22 @@
-package search
+﻿package search
 
 import (
 	"context"
-	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func SearchPrecedents(ctx context.Context, pool *pgxpool.Pool, q string) ([]map[string]any, error) {
-	// MVP: keyword LIKE; vector search later
-	ql := "%" + strings.ToLower(q) + "%"
-	rows, err := pool.Query(ctx, `select id, title, text, tags from precedent where lower(title) like $1 or lower(text) like $1 limit 10`, ql)
-	if err != nil {
-		return nil, err
-	}
-	out := []map[string]any{}
-	for rows.Next() {
-		var id int64
-		var title, text, tags string
-		rows.Scan(&id, &title, &text, &tags)
-		out = append(out, map[string]any{"id": id, "title": title, "text": text, "tags": tags})
-	}
-	return out, nil
+type Result struct {
+	ID      int64   `json:"id"`
+	Title   string  `json:"title"`
+	Snippet string  `json:"snippet"`
+	Score   float64 `json:"score"`
+	Tags    string  `json:"tags"`
+}
+
+// SearchPrecedents is a placeholder implementation that matches the handler signature.
+// It should eventually run hybrid search (keywords + embeddings) in DB.
+func SearchPrecedents(ctx context.Context, db *pgxpool.Pool, q string) ([]Result, error) {
+	// TODO: implement hybrid search
+	return []Result{}, nil
 }
