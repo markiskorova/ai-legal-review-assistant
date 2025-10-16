@@ -4,46 +4,59 @@ import (
 	"context"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	wdb "ai-legal-review-assistant/apps/worker/internal/db"
+	"ai-legal-review-assistant/apps/worker/internal/jobs"
+	"ai-legal-review-assistant/apps/worker/internal/queue"
 )
 
-func main() {
-	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, os.Getenv("POSTGRES_DSN"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer pool.Close()
+// import your llm adapter from llm.go
+// ensure llm.go provides something like:
+// type OpenAILLM struct {}
+// func (o *OpenAILLM) Validate(ctx context.Context, clause, guidance string) (risk, rationale, suggestion string, err error) { ... }
 
-	log.Println("worker started")
+func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	log.Println("[worker] starting…")
+
+	// DB
+	db := wdb.Connect(ctx)
+	defer db.Close()
+
+	// Queue
+	q := queue.NewClient()
+
+	// LLM (can be nil initially to run rules-only)
+	var llm jobs.LLM = new(OpenAILLM) // or set to nil to skip LLM
+
+	// Main loop
 	for {
-		// naive poll: select findings without suggestion where rule.llm_check=true
-		rows, _ := pool.Query(ctx, `
-      select f.id, c.text, r.guidance
-      from finding f
-      join rule r on r.id=f.rule_id
-      join clause c on c.id=f.clause_id
-      where (f.suggestion is null or f.suggestion='')
-        and r.llm_check=true
-      limit 5`)
-		type item struct {
-			ID               int64
-			Clause, Guidance string
+		select {
+		case <-ctx.Done():
+			log.Println("[worker] shutting down")
+			return
+		default:
 		}
-		items := []item{}
-		for rows.Next() {
-			var it item
-			rows.Scan(&it.ID, &it.Clause, &it.Guidance)
-			items = append(items, it)
+
+		job, err := q.Dequeue(ctx)
+		if err != nil {
+			log.Printf("[worker] dequeue error: %v", err)
+			time.Sleep(1 * time.Second)
+			continue
 		}
-		for _, it := range items {
-			// call LLM
-			rationale, suggestion, risk := callLLM(it.Clause, it.Guidance)
-			_, _ = pool.Exec(ctx, `update finding set rationale=$1, suggestion=$2, severity=$3 where id=$4`,
-				rationale, suggestion, risk, it.ID)
+		if job == nil {
+			// no job this tick
+			continue
 		}
-		time.Sleep(2 * time.Second)
+
+		log.Printf("[worker] processing document_id=%d playbook_id=%v", job.DocumentID, job.PlaybookID)
+		if err := jobs.ReviewDocument(ctx, db, llm, job.DocumentID, job.PlaybookID); err != nil {
+			log.Printf("[worker] review error: %v", err)
+		}
 	}
 }

@@ -1,0 +1,80 @@
+
+=== apps\api ===
+
+Folder PATH listing
+Volume serial number is B042-C06C
+C:\PROJECTS\AI LEGAL REVIEW ASSISTANT\CODE\AI-LEGAL-REVIEW-ASSISTANT\APPS\API
+ª   Dockerfile
+ª   go.mod
+ª   go.sum
+ª   handlers_auth.go
+ª   handlers_documents.go
+ª   handlers_matters.go
+ª   handlers_review.go
+ª   handlers_search.go
+ª   main.go
+ª   
++---internal
+ª   +---auth
+ª   ª       jwt.go
+ª   ª       
+ª   +---db
+ª           db.go
+ª           
++---migrations
+        0001_init.sql
+        0002_seed_playbook.sql
+        0003_seed_precedents.sql
+        0004_seed_org.sql
+        
+
+=== apps\worker ===
+
+Folder PATH listing
+Volume serial number is B042-C06C
+C:\PROJECTS\AI LEGAL REVIEW ASSISTANT\CODE\AI-LEGAL-REVIEW-ASSISTANT\APPS\WORKER
+ª   Dockerfile
+ª   
++---cmd
+ª   +---worker
+ª           llm.go
+ª           main.go
+ª           
++---internal
+    +---db
+    ª       pg.go
+    ª       
+    +---jobs
+    ª       review.go
+    ª       
+    +---queue
+            redis.go
+            
+
+=== infra ===
+
+Folder PATH listing
+Volume serial number is B042-C06C
+C:\PROJECTS\AI LEGAL REVIEW ASSISTANT\CODE\AI-LEGAL-REVIEW-ASSISTANT\INFRA
+ª   docker-compose.yml
+ª   Makefile
+ª   
++---infra
+        .env
+        .env.example
+        
+
+=== pkg ===
+
+Folder PATH listing
+Volume serial number is B042-C06C
+C:\PROJECTS\AI LEGAL REVIEW ASSISTANT\CODE\AI-LEGAL-REVIEW-ASSISTANT\PKG
+ª   go.mod
+ª   go.sum
+ª   
++---review
+ª       engine.go
+ª       
++---search
+        hybrid.go
+        

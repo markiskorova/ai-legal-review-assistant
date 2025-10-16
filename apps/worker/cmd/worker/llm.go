@@ -1,15 +1,13 @@
 package main
 
 import (
-	"os"
-	"strings"
+	"context"
 )
 
-func callLLM(clause, guidance string) (rationale, suggestion, risk string) {
-	_ = os.Getenv("OPENAI_API_KEY")
-	// MVP stub; replace with actual OpenAI client later
-	if strings.Contains(strings.ToLower(clause), "liabil") {
-		return "Clause deviates from 12-month fee cap.", "Limit total liability to fees paid in the prior 12 months.", "High"
-	}
-	return "Looks acceptable per guidance.", "No change required.", "Low"
+type OpenAILLM struct{}
+
+func (o *OpenAILLM) Validate(ctx context.Context, clause, guidance string) (risk, rationale, suggestion string, err error) {
+	// Stub for now; you can integrate real OpenAI later.
+	// Return a deterministic response so the UI has something to show.
+	return "High", "Clause deviates from guidance keywords.", "Proposed safer language...", nil
 }

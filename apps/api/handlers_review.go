@@ -9,7 +9,24 @@ import (
 	"github.com/go-chi/chi/v5"
 	dbase "github.com/markiskorova/ai-legal-review-assistant/apps/api/internal/db"
 	"github.com/markiskorova/ai-legal-review-assistant/pkg/review"
+	"github.com/redis/go-redis/v9"
 )
+
+type reviewStartJob struct {
+	DocumentID int64  `json:"document_id"`
+	PlaybookID *int64 `json:"playbook_id,omitempty"`
+}
+
+func enqueueReview(ctx context.Context, redisURL, queueName string, job reviewStartJob) error {
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		return err
+	}
+	rdb := redis.NewClient(opt)
+	defer rdb.Close()
+	b, _ := json.Marshal(job)
+	return rdb.RPush(ctx, queueName, b).Err()
+}
 
 func handleStartReview(w http.ResponseWriter, r *http.Request) {
 	docID, _ := strconv.ParseInt(chi.URLParam(r, "document_id"), 10, 64)
